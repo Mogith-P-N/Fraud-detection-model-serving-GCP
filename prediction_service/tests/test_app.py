@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from prediction_service.app.main import create_app
 
 
-class StubModel:a
+class StubModel:
     def predict_proba(self, X):
         # Always predict class 1 with 0.9 confidence
         import numpy as np

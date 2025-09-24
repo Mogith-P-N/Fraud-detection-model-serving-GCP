@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-prediction
+  labels:
+    app: fraud-prediction
+spec:
+  type: ClusterIP
+  selector:
+    app: fraud-prediction
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000

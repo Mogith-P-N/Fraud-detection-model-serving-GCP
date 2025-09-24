@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-prediction
+  labels:
+    app: fraud-prediction
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fraud-prediction
+  template:
+    metadata:
+      labels:
+        app: fraud-prediction
+    spec:
+      containers:
+        - name: prediction-service
+          image: REGION-docker.pkg.dev/PROJECT_ID/REPO_NAME/fraud-prediction:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: MODEL_PATH
+              value: /app/prediction_service/models/model.pkl
+            - name: MODEL_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.annotations['kubectl.kubernetes.io/restartedAt']
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3

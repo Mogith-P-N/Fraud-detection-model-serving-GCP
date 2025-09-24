@@ -58,23 +58,45 @@ flowchart LR
 ```
 
 ### Technology Choices & Justification
-
-- FastAPI: High-performance Python web framework with async support and OpenAPI out-of-the-box.
-- Docker: Standard container packaging for reproducible deployments.
-- Kubernetes (GKE): Managed Kubernetes for automated scaling, rolling updates, and reliability.
-- HorizontalPodAutoscaler: Auto-scales pods based on CPU to handle traffic bursts.
-- Terraform: Declarative, versioned infrastructure as code for GKE, IAM, and Artifact Registry.
-- GitHub Actions: Native CI/CD integrated with repository; uses OIDC Workload Identity Federation to authenticate to GCP without long-lived keys.
-- Artifact Registry: Secure, regional image storage close to GKE for faster pulls.
-- Probes & Resource Limits: Ensures pod health and prevents noisy neighbor issues.
-- Model Versioning: Model version and path injected via environment variables; decouples model from code.
+| Layer | Technology | Reason |
+|-------|------------|--------|
+| **Model Serving** | FastAPI (Python) + Uvicorn | Lightweight, async, easy to containerize, excellent for high‑throughput inference. |
+| **Container Runtime** | Docker (multi‑stage build) | Produces minimal images, supports reproducible builds. |
+| **Orchestration** | Google Kubernetes Engine (GKE) | Managed K8s service, auto‑scaling, integrates with GCP IAM & Artifact Registry. |
+| **CI/CD** | GitHub Actions + Terraform | IaC for GCP resources, automated testing, image build, and deployment on push. |
+| **Infrastructure** | Terraform | Declarative, version‑controlled GCP provisioning (GKE cluster, Artifact Registry, IAM). |
+| **Monitoring** | GKE health probes, Cloud Monitoring | Native health checks and observability. |
+| **Model Storage** | Google Artifact Registry (Docker) | Secure, private container image registry integrated with GCP. |
 
 ### Repository Layout
 
-- `prediction_service/`: FastAPI service, Dockerfile, tests.
-- `k8s/`: Kubernetes manifests for Deployment, Service, and HPA.
-- `terraform/`: Terraform to provision GKE, Artifact Registry, IAM, and Workload Identity Federation for GitHub Actions.
-- `.github/workflows/`: CI/CD pipeline to test, build, push, and deploy.
+## Repository Structure
+```
+/prediction_service
+    ├── app/
+    │   ├── main.py          # FastAPI app
+    │   ├── schemas.py        # Model loading & inference logic
+    │   └── __init__.py
+    ├── tests/
+    │   └── test_app.py
+    ├── Dockerfile
+    └── requirements.txt
+
+/k8s
+    ├── deployment.yaml
+    ├── service.yaml
+    └── hpa.yaml
+      
+/terraform
+    ├── main.tf
+    ├── variables.tf
+    ├── versions.tf
+    └── outputs.tf
+
+.github/workflows
+    └── deploy.yml
+
+README.md
 
 ### Local Development
 

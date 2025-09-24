@@ -85,12 +85,14 @@ flowchart LR
 /k8s
     ├── deployment.yaml
     ├── service.yaml
-    └── hpa.yaml            
+    └── hpa.yaml
+      
 /terraform
     ├── main.tf
     ├── variables.tf
     ├── versions.tf
     └── outputs.tf
+
 .github/workflows
     └── deploy.yml
 

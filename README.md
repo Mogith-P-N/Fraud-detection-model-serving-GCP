@@ -6,55 +6,63 @@ This repository contains a reference implementation to productionize a real-time
 
 ```mermaid
 flowchart LR
+    %% Client / Caller
     subgraph Client
         A[Caller / Ingestion App]
     end
 
     %% CI/CD runs outside GCP (GitHub-hosted runners)
-    subgraph CICD[CI_CD GitHub Actions - outside GCP]
+    subgraph CICD[CI_CD GitHub Actions outside GCP]
         GH[GitHub Actions]
         BUILD[Build & Tag Image]
+        APPL[kubectl apply manifests]
     end
 
+    %% GCP Resources
     subgraph GCP
         subgraph Network
-            ILB[Internal/External Load Balancer]
+            ILB[Internal or External LB]
         end
 
         subgraph GKE Cluster
             SVC[ClusterIP Service]
-            DEP[Prediction Deployment\nPods running FastAPI]
-            HPA[HorizontalPodAutoscaler]
+            DEP[Prediction Deployment\nFastAPI Pods]
+            HPA[HPA]
         end
 
         subgraph Artifacts
             AR[Artifact Registry]
         end
 
-        subgraph Data & Model
-            BQ[BigQuery / Feature Store]
+        subgraph Data_Model[Data & Model]
+            BQ[BigQuery / Features]
             GCS[GCS Model Bucket]
-            TR[Vertex AI / Batch Trainer]
-            SCH[Cloud Scheduler + Cloud Run Job]
+            TR[Vertex AI Trainer]
+            SCH[Scheduler Job]
         end
     end
 
-    A -->|HTTPS JSON /v1/predict| ILB
+    %% Request Flow
+    A -->|HTTPS /v1/predict| ILB
     ILB --> SVC
     SVC --> DEP
     HPA --> DEP
 
+    %% CI/CD Flow
     GH --> BUILD
     BUILD -->|docker push| AR
-    GH -->|kubectl apply| DEP
+    GH --> APPL
+    APPL -->|apply manifests| DEP
     DEP -->|pull image| AR
 
     %% Retraining Path
     SCH --> TR
-    TR -->|new model.pkl| GCS
-    GH -->|trigger on new model| BUILD
+    TR -->|model.pkl| GCS
+    GCS -->|notify change| GH
 
+    %% Feature Lookup (dashed)
     A -.->|Features| BQ
+```
 ```
 
 ### Technology Choices & Justification

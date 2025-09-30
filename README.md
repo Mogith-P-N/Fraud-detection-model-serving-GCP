@@ -75,10 +75,11 @@ flowchart LR
 | **Infrastructure** | Terraform | Declarative, version‑controlled GCP provisioning (GKE cluster, Artifact Registry, IAM). |
 | **Monitoring** | GKE health probes, Cloud Monitoring | Native health checks and observability. |
 | **Model Storage** | Google Artifact Registry (Docker) | Secure, private container image registry integrated with GCP. |
+```
 
-### Repository Layout
+## Repository Layout
 
-## Repository Structure
+### Repository Structure
 ```
 /prediction_service
     ├── app/
@@ -105,6 +106,7 @@ flowchart LR
     └── deploy.yml
 
 README.md
+```
 
 ### Local Development
 
